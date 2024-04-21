@@ -1,0 +1,5 @@
+*.xyz
+dir1/**/*.x
+!dir1/**/y.x
+**/__pycache__/
+__init__.py
