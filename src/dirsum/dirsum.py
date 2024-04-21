@@ -13,12 +13,6 @@ class Config:
     pretty: bool
 
 
-"""
-ESC[38:5:⟨n⟩m Select foreground color      where n is a number from the table below
-ESC[48:5:⟨n⟩m Select background color
-"""
-
-
 def colour_hash_str(digest: str) -> str:
     """
     Colourize a hex digest string.
