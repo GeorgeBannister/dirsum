@@ -13,6 +13,24 @@ class Config:
     pretty: bool
 
 
+"""
+ESC[38:5:⟨n⟩m Select foreground color      where n is a number from the table below
+ESC[48:5:⟨n⟩m Select background color
+"""
+
+
+def colour_hash_str(digest: str) -> str:
+    """
+    Colourize a hex digest string.
+
+    :param digest: A hex digest str
+    :returns: `digest` with ANSI escape codes to add colour
+    """
+    seed = int(digest, base=16) % 256
+    opposite_seed = (seed - 128) % 128
+    return f"\033[38:5:{seed}m\033[48:5:{opposite_seed}:m{digest}\033[m"
+
+
 def parse_args() -> Config:
     parser = argparse.ArgumentParser()
     parser.add_argument("-i", "--ignore", help="Path to ignorefile")
@@ -33,6 +51,17 @@ def main() -> None:
     else:
         files = list([x.relative_to(Path.cwd()) for x in Path.cwd().glob("**/*") if not x.is_dir()])
     files.sort()
+
+    sums = []
+
     for file in files:
         sum = hashlib.md5(file.read_bytes(), usedforsecurity=False)
-        print(f"{file}: {sum.hexdigest()}")
+        if config.pretty:
+            print(f"{file}: {colour_hash_str(sum.hexdigest())}")
+        else:
+            print(f"{file} {sum.hexdigest()}")
+        sums.append(sum.hexdigest())
+    if config.pretty:
+        print(f"\nTOTAL {colour_hash_str(hashlib.md5(''.join(sums).encode('utf-8')).hexdigest())}")
+    else:
+        print(f"\nTOTAL {hashlib.md5(''.join(sums).encode('utf-8')).hexdigest()}")
